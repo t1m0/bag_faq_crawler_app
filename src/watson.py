@@ -39,5 +39,30 @@ class WatsonWrapper:
             description=question,
             title=question,
             conditions='#' + uuid,
-            output=DialogNodeOutput(generic=[dialogOutput])
+            output=DialogNodeOutput(generic=[dialogOutput]),
+            parent='faq'
         ).get_result()
+
+    def create_dialog_folder(self, uuid, title):
+        self.assistant.create_dialog_node(
+            workspace_id=self.workspace_id,
+            dialog_node=uuid,
+            title=title,
+            type='folder'
+        ).get_result()
+
+    def listDialogNodes(self):
+        dialog_nodes = {}
+        response=self.assistant.list_dialog_nodes(
+            workspace_id=self.workspace_id
+        ).get_result()
+        for node in response['dialog_nodes']:
+            current_node = {
+                'id' : node['dialog_node'],
+                'question' : node['title']
+            }
+            if 'output' in node.keys():
+                current_node['answer'] = node['output']['generic'][0]['values'][0]['text']
+            dialog_nodes[node['dialog_node']] = current_node;
+        return dialog_nodes
+
