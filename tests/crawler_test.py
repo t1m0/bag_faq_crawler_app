@@ -8,7 +8,6 @@ class CrawlerTest(unittest.TestCase):
     uuids = []
 
     def test_crawler(self):
-        logging.basicConfig(level=logging.INFO)
         crawler = Crawler('https://www.faq.bag.admin.ch/en/categories/vaccination', self.callback)
         crawler.crawl()
 

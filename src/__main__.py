@@ -15,7 +15,7 @@ if __name__ == "__main__":
     if "v1/workspaces" in watson_workspace_url:
         print("Remove \"/v1/workspaces/.../message\" at the end of the workspace url")
         exit(1)
-    BagFaqCrawler(watson_api_key,watson_skill_id,watson_workspace_url,bag_faq_url).crawl()
+    BagFaqCrawler(watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url).crawl()
 
 
 

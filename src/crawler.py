@@ -6,14 +6,12 @@ import re
 class Crawler:
     uuid_regex = re.compile(r"[^/]*$", re.IGNORECASE)
 
-    base_faq_url = ""
-
     def __init__(self, base_faq_url, entry_callback):
         self.base_faq_url = base_faq_url
         self.entry_callback = entry_callback
 
     def crawl(self):
-        response = requests.get('https://www.faq.bag.admin.ch/en/categories/vaccination')
+        response = requests.get(self.base_faq_url)
         selector = Selector(response.text)
         self.__extract_entries(selector)
         faq_page_selectors = selector.css('a[title][href]')
@@ -43,4 +41,4 @@ class Crawler:
     def __extract_uuid(self, link):
         last_index = link.rindex('/')
         uuid = link[last_index + 1:len(link)]
-        return uuid.replace("%E2%80%99","")
+        return uuid.replace("%E2%80%99", "")
