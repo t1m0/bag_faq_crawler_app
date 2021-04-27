@@ -31,9 +31,10 @@ class BagFaqCrawler:
         elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question, answer):
             logging.info("Question or Answer for " + uuid + " changed, therefore updating watson assistant.")
             self.update_watson(uuid, self.existing_dialog_nodes[uuid], question, answer)
+            del self.existing_dialog_nodes[uuid]
         else:
             logging.info("Not adding " + uuid + " to watson assistant, since it's already present.")
-        del self.existing_dialog_nodes[uuid]
+            del self.existing_dialog_nodes[uuid]
 
     def existing_entry_has_changed(self, existing_dialog_node, question, answer):
         return question != existing_dialog_node['question'] or answer != existing_dialog_node['answer']

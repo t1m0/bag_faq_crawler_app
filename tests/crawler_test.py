@@ -5,7 +5,7 @@ from crawler import Crawler
 
 
 class CrawlerTest(unittest.TestCase):
-    uuids = []
+    faqs = {}
 
     def test_crawler(self):
         crawler = Crawler('https://www.faq.bag.admin.ch/en/categories/vaccination', self.callback)
@@ -17,8 +17,8 @@ class CrawlerTest(unittest.TestCase):
         self.assertIsNotNone(question)
         self.assertIsNotNone(answer)
         self.assertEqual(uuid.count("/"), 0)
-        self.assertNotIn(uuid, self.uuids)
-        self.uuids.append(uuid)
+        self.assertNotIn(uuid, self.faqs.keys())
+        self.faqs['uuid'] = {'question': question, 'answer': answer}
         logging.info(uuid + ' - ' + link + ' - ' + question + ' - ' + answer)
 
 

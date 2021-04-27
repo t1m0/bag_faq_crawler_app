@@ -1,9 +1,12 @@
 import requests
 from parsel import Selector
+from html.parser import HTMLParser
 import re
 
 
 class Crawler:
+    html_tag_regex = re.compile('<.*?>')
+
     uuid_regex = re.compile(r"[^/]*$", re.IGNORECASE)
 
     def __init__(self, base_faq_url, entry_callback):
@@ -31,12 +34,15 @@ class Crawler:
             answer = self.__extract_answer(link)
             uuid = self.__extract_uuid(relative_link)
             if answer:
-                self.entry_callback(uuid, link, question, answer)
+                self.entry_callback(uuid, link, question, self.__replace_html_tags(answer))
 
     def __extract_answer(self, link):
         response = requests.get(link)
         selector = Selector(response.text)
-        return selector.css('.field-item.even p').xpath('text()').get()
+        return selector.css('.field-item.even *').xpath('text()').get()
+
+    def __replace_html_tags(self, answer):
+        return re.sub(self.html_tag_regex, '', answer)
 
     def __extract_uuid(self, link):
         last_index = link.rindex('/')
