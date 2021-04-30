@@ -24,14 +24,14 @@ class BagFaqCrawler:
             del self.existing_dialog_nodes['faq']
 
     def callback(self, uuid, link, question, answer):
-        question_with_bag_marker = question + self.BAG_MARKER
+        question_with_marker = question + self.BAG_MARKER
         if uuid not in self.existing_dialog_nodes.keys():
             logging.info("Adding " + uuid + "to watson assitant")
-            self.watson.createIntent(uuid, question_with_bag_marker)
-            self.watson.createDialogNode(uuid, question_with_bag_marker, answer)
-        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question_with_bag_marker, answer):
+            self.watson.createIntent(uuid, question_with_marker)
+            self.watson.createDialogNode(uuid, question_with_marker, answer)
+        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question_with_marker, answer):
             logging.info("Question or Answer for " + uuid + " changed, therefore updating watson assistant.")
-            self.update_watson(uuid, self.existing_dialog_nodes[uuid], question_with_bag_marker, answer)
+            self.update_watson(uuid, question_with_marker, answer)
             del self.existing_dialog_nodes[uuid]
         else:
             logging.info("Not adding " + uuid + " to watson assistant, since it's already present.")
@@ -40,8 +40,14 @@ class BagFaqCrawler:
     def existing_entry_has_changed(self, existing_dialog_node, question, answer):
         return question != existing_dialog_node['question'] or answer != existing_dialog_node['answer']
 
-    def update_watson(self, uuid, existing_node, question, answer):
-        # for now we only update the dialog node - if the question changes the uuid changes as well
+    def update_watson(self, uuid, question, answer):
+        current_intent = self.watson.get_intent(uuid)
+        for example in current_intent['examples']:
+            if self.BAG_MARKER in example['text']:
+                example['text'] = question
+                break
+        current_intent['description'] = question
+        self.watson.update_intent(current_intent)
         self.watson.update_dialog_node(uuid, question, answer)
 
     def remove_no_longer_valid_faq_entries(self):

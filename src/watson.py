@@ -18,7 +18,7 @@ class WatsonWrapper:
     def get_intent(self, uuid):
         return self.assistant.get_intent(
             workspace_id=self.workspace_id,
-            intent='am-i-already-protected-getting-coronavirus-disease-after-first-dose-vaccine',
+            intent=uuid,
             export='true'
         ).get_result()
 
@@ -35,20 +35,12 @@ class WatsonWrapper:
             ]
         ).get_result()
 
-    def update_intent(self, uuid, questions):
-        new_examples = []
-        for question in questions:
-            new_examples.append({'text': question, 'description': question})
+    def update_intent(self, intent):
         response = self.assistant.update_intent(
             workspace_id=self.workspace_id,
-            intent=uuid,
-            new_description=question,
-            new_examples=[
-                {
-                    'text': question,
-                    'description': question
-                }
-            ]
+            intent=intent['intent'],
+            new_description=intent['description'],
+            new_examples=intent['examples']
         ).get_result()
 
     def delete_intent(self, uuid):
