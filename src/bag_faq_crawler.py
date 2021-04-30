@@ -27,13 +27,14 @@ class BagFaqCrawler:
     def callback(self, uuid, link, question, answer):
         question_with_marker = question + self.BAG_MARKER
         short_answer = self.shorten_answer(answer)
+        answer_with_link = self.add_link_to_faq(short_answer, link)
         if uuid not in self.existing_dialog_nodes.keys():
             logging.info("Adding " + uuid + "to watson assitant")
             self.watson.createIntent(uuid, question_with_marker)
-            self.watson.createDialogNode(uuid, question_with_marker, short_answer)
-        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question_with_marker, short_answer):
+            self.watson.createDialogNode(uuid, question_with_marker, answer_with_link)
+        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question_with_marker, answer_with_link):
             logging.info("Question or Answer for " + uuid + " changed, therefore updating watson assistant.")
-            self.update_watson(uuid, question_with_marker, short_answer)
+            self.update_watson(uuid, question_with_marker, answer_with_link)
             del self.existing_dialog_nodes[uuid]
         else:
             logging.info("Not adding " + uuid + " to watson assistant, since it's already present.")
@@ -46,6 +47,9 @@ class BagFaqCrawler:
         elif cut_index <= 0:
             cut_index = len(answer)
         return answer[0:cut_index+1] + ' ...'
+
+    def add_link_to_faq(self, answer, link):
+        return answer + '<br/>You can find more details <a target="_blank" href="' + link + '">here</a>.'
 
     def existing_entry_has_changed(self, existing_dialog_node, question, answer):
         return question != existing_dialog_node['question'] or answer != existing_dialog_node['answer']

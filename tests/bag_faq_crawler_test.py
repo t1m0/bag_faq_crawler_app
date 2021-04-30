@@ -4,7 +4,8 @@ from bag_faq_crawler import BagFaqCrawler
 
 
 class TestBagFaqCrawler(unittest.TestCase):
-    bag_faq_crawler = BagFaqCrawler("", "", "", "https://www.faq.bag.admin.ch/en/categories/vaccination")
+    find_more_link = '<br/>You can find more details <a target="_blank" href="http://localhost">here</a>.'
+    bag_faq_crawler = BagFaqCrawler("", "", "", "")
 
     def setUp(self):
         self.watson_wrapper = unittest.mock.Mock()
@@ -19,54 +20,54 @@ class TestBagFaqCrawler(unittest.TestCase):
 
     def test_create_new_cut_at_point(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(return_value={'faq': {}})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question', 'answer. more details')
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question', 'answer. more details')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.createIntent.assert_called_with('test', 'question (BAG)')
-        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer. ...')
+        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer. ...' + self.find_more_link)
 
     def test_create_new_cut_at_length(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(return_value={'faq': {}})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question', 'answer with some more details')
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question', 'answer with some more details')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.createIntent.assert_called_with('test', 'question (BAG)')
-        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer with ...')
+        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer with ...' + self.find_more_link)
 
     def test_create_new_not_cut(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(return_value={'faq': {}})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question', 'answer')
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question', 'answer')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.createIntent.assert_called_with('test', 'question (BAG)')
-        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer ...')
+        self.watson_wrapper.createDialogNode.assert_called_with('test', 'question (BAG)', 'answer ...' + self.find_more_link)
 
     def test_no_change_since_node_already_exists(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(
-            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...'}})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question', 'answer')
+            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...' + self.find_more_link}})
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question', 'answer')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.createIntent.assert_not_called()
         self.watson_wrapper.createDialogNode.assert_not_called()
 
     def test_answer_changed_of_existing_node(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(
-            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...'}})
+            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...' + self.find_more_link}})
         self.watson_wrapper.get_intent = unittest.mock.Mock(
             return_value={'intent': 'test', 'examples': [{'text': 'question (BAG)'}, {'text': 'question (NOT_BAG)'}]})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question', 'answer2')
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question', 'answer2')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.update_intent.assert_called_with(
             {'intent': 'test', 'examples': [{'text': 'question (BAG)'}, {'text': 'question (NOT_BAG)'}], 'description': 'question (BAG)'})
-        self.watson_wrapper.update_dialog_node.assert_called_with('test', 'question (BAG)', 'answer2 ...')
+        self.watson_wrapper.update_dialog_node.assert_called_with('test', 'question (BAG)', 'answer2 ...' + self.find_more_link)
 
     def test_question_changed_of_existing_node(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(
-            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...'}})
+            return_value={'faq': {}, 'test': {'uuid': 'test', 'question': 'question (BAG)', 'answer': 'answer ...' + self.find_more_link}})
         self.watson_wrapper.get_intent = unittest.mock.Mock(
             return_value={'intent': 'test', 'examples': [{'text': 'question (BAG)'}, {'text': 'question (NOT_BAG)'}]})
-        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', '', 'question2', 'answer')
+        self.crawler.crawl = lambda: self.bag_faq_crawler.callback('test', 'http://localhost', 'question2', 'answer')
         self.bag_faq_crawler.crawl()
         self.watson_wrapper.update_intent.assert_called_with(
             {'intent': 'test', 'examples': [{'text': 'question2 (BAG)'}, {'text': 'question (NOT_BAG)'}], 'description': 'question2 (BAG)'})
-        self.watson_wrapper.update_dialog_node.assert_called_with('test', 'question2 (BAG)', 'answer ...')
+        self.watson_wrapper.update_dialog_node.assert_called_with('test', 'question2 (BAG)', 'answer ...' + self.find_more_link)
 
     def test_delete_missing_faq_entry(self):
         self.watson_wrapper.listDialogNodes = unittest.mock.Mock(
