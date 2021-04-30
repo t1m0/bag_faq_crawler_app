@@ -1,12 +1,13 @@
 import requests
 from parsel import Selector
 import re
-
+import logging
 
 class Crawler:
     html_tag_regex = re.compile('<.*?>')
 
     uuid_regex = re.compile(r"[^/]*$", re.IGNORECASE)
+    uuids = []
 
     def __init__(self, base_faq_url, entry_callback):
         self.base_faq_url = base_faq_url
@@ -17,6 +18,7 @@ class Crawler:
         selector = Selector(response.text)
         faq_category_page_selectors = selector.css('span.field-content a[href]')
         for category_page in faq_category_page_selectors:
+            logging.info("Crawling category +"+category_page.xpath('text()').get())
             url = category_page.xpath('@href').get()
             if "categories" in url:
                 self.__process_category_page(self.__compile_full_url(url))
@@ -41,8 +43,11 @@ class Crawler:
             link = self.__compile_full_url(relative_link)
             answer = self.__extract_answer(link)
             uuid = self.__extract_uuid(relative_link)
-            if answer:
+            if answer and uuid not in self.uuids:
                 self.entry_callback(uuid, link, question, self.__replace_html_tags(answer))
+                self.uuids.append(uuid)
+            elif answer:
+                logging.info("Ignoring "+uuid+", since it was already processed!")
 
     def __compile_full_url(self, relative_url):
         relative_url_without_language = relative_url[3:len(relative_url)]

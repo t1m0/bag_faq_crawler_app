@@ -19,7 +19,7 @@ class CrawlerTest(unittest.TestCase):
         self.assertIsNotNone(answer)
         self.assertEqual(uuid.count("/"), 0)
         self.assertNotIn(uuid, self.faqs.keys())
-        self.faqs['uuid'] = {'question': question, 'answer': answer}
+        self.faqs[uuid] = {'question': question, 'answer': answer}
         logging.info(uuid + ' - ' + link + ' - ' + question + ' - ' + answer)
 
 
