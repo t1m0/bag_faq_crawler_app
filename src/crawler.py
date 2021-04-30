@@ -59,4 +59,7 @@ class Crawler:
     def __extract_uuid(self, link):
         last_index = link.rindex('/')
         uuid = link[last_index + 1:len(link)]
-        return uuid.replace("%E2%80%99", "")
+        uuid = uuid.replace("%E2%80%99", "")
+        if len(uuid) > 128:
+            uuid = uuid[0:128]
+        return uuid
