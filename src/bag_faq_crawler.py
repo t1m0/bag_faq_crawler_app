@@ -5,7 +5,7 @@ from watson import WatsonWrapper
 
 
 class BagFaqCrawler:
-
+    BAG_MARKER = ' (BAG)'
     def __init__(self, watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url):
         self.watson = WatsonWrapper(watson_skill_id, watson_api_key, watson_workspace_url)
         self.crawler = Crawler(bag_faq_url, self.callback)
@@ -24,13 +24,14 @@ class BagFaqCrawler:
             del self.existing_dialog_nodes['faq']
 
     def callback(self, uuid, link, question, answer):
+        question_with_bag_marker = question + self.BAG_MARKER
         if uuid not in self.existing_dialog_nodes.keys():
             logging.info("Adding " + uuid + "to watson assitant")
-            self.watson.createIntent(uuid, question)
-            self.watson.createDialogNode(uuid, question, answer)
-        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question, answer):
+            self.watson.createIntent(uuid, question_with_bag_marker)
+            self.watson.createDialogNode(uuid, question_with_bag_marker, answer)
+        elif self.existing_entry_has_changed(self.existing_dialog_nodes[uuid], question_with_bag_marker, answer):
             logging.info("Question or Answer for " + uuid + " changed, therefore updating watson assistant.")
-            self.update_watson(uuid, self.existing_dialog_nodes[uuid], question, answer)
+            self.update_watson(uuid, self.existing_dialog_nodes[uuid], question_with_bag_marker, answer)
             del self.existing_dialog_nodes[uuid]
         else:
             logging.info("Not adding " + uuid + " to watson assistant, since it's already present.")
