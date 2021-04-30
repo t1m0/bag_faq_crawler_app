@@ -1,6 +1,5 @@
 import requests
 from parsel import Selector
-from html.parser import HTMLParser
 import re
 
 

@@ -1,7 +1,7 @@
 import logging
 
-from .crawler import Crawler
-from .watson import WatsonWrapper
+from crawler import Crawler
+from watson import WatsonWrapper
 
 
 class BagFaqCrawler:
