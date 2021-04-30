@@ -15,12 +15,21 @@ class Crawler:
     def crawl(self):
         response = requests.get(self.base_faq_url)
         selector = Selector(response.text)
+        faq_category_page_selectors = selector.css('span.field-content a[href]')
+        for category_page in faq_category_page_selectors:
+            url = category_page.xpath('@href').get()
+            if "categories" in url:
+                self.__process_category_page(self.__compile_full_url(url))
+
+    def __process_category_page(self, page_link):
+        response = requests.get(page_link)
+        selector = Selector(response.text)
         self.__extract_entries(selector)
         faq_page_selectors = selector.css('a[title][href]')
         for page in faq_page_selectors:
             url = page.xpath('@href').get()
             if "page" in url:
-                response = requests.get('https://www.faq.bag.admin.ch' + url)
+                response = requests.get(self.__compile_full_url(url))
                 selector = Selector(response.text)
                 self.__extract_entries(selector)
 
@@ -29,11 +38,15 @@ class Crawler:
         for e in current_entries:
             relative_link = e.xpath('@href').get()
             question = e.xpath('text()').get()
-            link = 'https://www.faq.bag.admin.ch' + relative_link
+            link = self.__compile_full_url(relative_link)
             answer = self.__extract_answer(link)
             uuid = self.__extract_uuid(relative_link)
             if answer:
                 self.entry_callback(uuid, link, question, self.__replace_html_tags(answer))
+
+    def __compile_full_url(self, relative_url):
+        relative_url_without_language = relative_url[3:len(relative_url)]
+        return self.base_faq_url + relative_url_without_language
 
     def __extract_answer(self, link):
         response = requests.get(link)
