@@ -1,5 +1,5 @@
 import sys
-from bag_faq_crawler import BagFaqCrawler
+from bag_crawler import BagCrawler
 
 def main(args):
     if len(args) != 4:
@@ -13,7 +13,7 @@ def main(args):
     if "v1/workspaces" in watson_workspace_url:
         print("Remove \"/v1/workspaces/.../message\" at the end of the workspace url")
         exit(1)
-    BagFaqCrawler(watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url).crawl()
+    BagCrawler(watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url).crawl()
 
 if __name__ == "__main__":
 

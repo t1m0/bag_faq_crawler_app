@@ -1,15 +1,15 @@
 import logging
 import unittest
 
-from crawler import Crawler
+from faq_crawler import FaqCrawler
 
 
-class CrawlerTest(unittest.TestCase):
+class FaqCrawlerTest(unittest.TestCase):
     faqs = {}
 
     def test_crawler(self):
         logging.basicConfig(level=logging.INFO)
-        crawler = Crawler('https://www.faq.bag.admin.ch/en', self.callback)
+        crawler = FaqCrawler('https://www.faq.bag.admin.ch/en', self.callback)
         crawler.crawl()
 
     def callback(self, uuid, link, question, answer):

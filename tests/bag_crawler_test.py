@@ -1,11 +1,11 @@
 import unittest
 import unittest.mock
-from bag_faq_crawler import BagFaqCrawler
+from bag_crawler import BagCrawler
 
 
 class TestBagFaqCrawler(unittest.TestCase):
     find_more_link = '<br/>You can find more details <a target="_blank" href="http://localhost">here</a>.'
-    bag_faq_crawler = BagFaqCrawler("", "", "", "")
+    bag_faq_crawler = BagCrawler("", "", "", "")
 
     def setUp(self):
         self.watson_wrapper = unittest.mock.Mock()

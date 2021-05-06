@@ -1,15 +1,15 @@
 import logging
 
-from crawler import Crawler
+from faq_crawler import FaqCrawler
 from watson import WatsonWrapper
 
 
-class BagFaqCrawler:
+class BagCrawler:
     BAG_MARKER = ' (BAG)'
     MAX_ANSWER_LENGTH = 10
     def __init__(self, watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url):
         self.watson = WatsonWrapper(watson_skill_id, watson_api_key, watson_workspace_url)
-        self.crawler = Crawler(bag_faq_url, self.callback)
+        self.crawler = FaqCrawler(bag_faq_url, self.callback)
 
     def crawl(self):
         logging.basicConfig(level=logging.INFO)

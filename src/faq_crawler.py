@@ -3,7 +3,7 @@ from parsel import Selector
 import re
 import logging
 
-class Crawler:
+class FaqCrawler:
     html_tag_regex = re.compile('<.*?>')
 
     uuid_regex = re.compile(r"[^/]*$", re.IGNORECASE)
