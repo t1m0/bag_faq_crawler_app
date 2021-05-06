@@ -1,4 +1,6 @@
-from ibm_watson import AssistantV1
+import logging
+
+from ibm_watson import AssistantV1, ApiException
 from ibm_watson.assistant_v1 import DialogNodeOutputGenericDialogNodeOutputResponseTypeText, DialogNodeOutputTextValuesElement, DialogNodeOutput, CreateIntent, \
     DialogNode, Example
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
@@ -49,7 +51,18 @@ class WatsonWrapper:
             intent=uuid
         ).get_result()
 
-    def createDialogNode(self, uuid, question, answer):
+    def get_dialog_node(self, uuid):
+        try:
+            return self.assistant.get_dialog_node(
+                workspace_id=self.workspace_id,
+                dialog_node=uuid,
+                export='true'
+            ).get_result()
+        except ApiException as e:
+            logging.warning("Dialog node '"+uuid+"' not present!")
+            return None
+
+    def createDialogNode(self, uuid, question, answer, parent):
         dialogOutput = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
@@ -61,10 +74,10 @@ class WatsonWrapper:
             title=question,
             conditions='#' + uuid,
             output=DialogNodeOutput(generic=[dialogOutput]),
-            parent='faq'
+            parent=parent
         ).get_result()
 
-    def update_dialog_node(self, uuid, question, answer):
+    def update_dialog_node(self, uuid, question, answer, parent):
         dialog_output = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
@@ -75,6 +88,7 @@ class WatsonWrapper:
             new_description=question,
             new_title=question,
             new_output=DialogNodeOutput(generic=[dialog_output]),
+            new_parent=parent
         ).get_result()
 
     def delete_dialog_node(self, uuid):
@@ -91,13 +105,13 @@ class WatsonWrapper:
             type='folder'
         ).get_result()
 
-    def listDialogNodes(self):
+    def list_dialog_nodes_for_parent(self, parent):
         dialog_nodes = {}
         response = self.assistant.list_dialog_nodes(
             workspace_id=self.workspace_id
         ).get_result()
         for node in response['dialog_nodes']:
-            if ('parent' in node and 'faq' == node['parent']) or node['dialog_node'] == 'faq':
+            if 'parent' in node and parent == node['parent']:
                 current_node = {
                     'uuid': node['dialog_node'],
                     'question': node['title']
