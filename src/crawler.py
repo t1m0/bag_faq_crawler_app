@@ -20,7 +20,7 @@ class Crawler:
         for category_page in faq_category_page_selectors:
             logging.info("Crawling category +"+category_page.xpath('text()').get())
             url = category_page.xpath('@href').get()
-            if "categories" in url:
+            if "categories" in url and "vaccination" in url:
                 self.__process_category_page(self.__compile_full_url(url))
 
     def __process_category_page(self, page_link):
@@ -64,7 +64,7 @@ class Crawler:
     def __extract_uuid(self, link):
         last_index = link.rindex('/')
         uuid = link[last_index + 1:len(link)]
-        uuid = uuid.replace("%E2%80%99", "")
+        uuid = uuid.replace("%E2%80%99", "").replace("%E2%80%93","").replace("%E2%80%98","").replace("%E2%80%9C","")
         if len(uuid) > 128:
             uuid = uuid[0:128]
         return uuid
