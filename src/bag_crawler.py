@@ -52,7 +52,7 @@ class BagCrawler:
         if phone:
             text += ' or by phone '+phone
         text += '.'
-        if canton in self.existing_vaccination_centers.keys():
+        if uuid in self.existing_vaccination_centers.keys():
             logging.info("Updating "+canton)
             self.watson.update_dialog_node(uuid,canton,text,self.SCHEDULE_VACCINATION_NODE)
         else:
