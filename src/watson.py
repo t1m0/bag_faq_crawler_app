@@ -108,7 +108,8 @@ class WatsonWrapper:
     def list_dialog_nodes_for_parent(self, parent):
         dialog_nodes = {}
         response = self.assistant.list_dialog_nodes(
-            workspace_id=self.workspace_id
+            workspace_id=self.workspace_id,
+            page_limit=500
         ).get_result()
         for node in response['dialog_nodes']:
             if 'parent' in node and parent == node['parent']:
