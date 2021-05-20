@@ -64,7 +64,7 @@ class FaqCrawler:
     def __extract_uuid(self, link):
         last_index = link.rindex('/')
         uuid = link[last_index + 1:len(link)]
-        uuid = uuid.replace("%E2%80%99", "").replace("%E2%80%93","").replace("%E2%80%98","").replace("%E2%80%9C","")
+        uuid = uuid.replace("%E2%80%99", "").replace("%E2%80%93","").replace("%E2%80%98","").replace("%E2%80%9C","").replace("%E2%80%9D","").replace("%","")
         if len(uuid) > 128:
             uuid = uuid[0:128]
         return uuid
