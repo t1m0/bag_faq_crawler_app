@@ -20,7 +20,7 @@ class FaqCrawler:
         for category_page in faq_category_page_selectors:
             logging.info("Crawling category +"+category_page.xpath('text()').get())
             url = category_page.xpath('@href').get()
-            if "categories" in url and "vaccination" in url:
+            if "categories" in url:
                 self.__process_category_page(self.__compile_full_url(url))
 
     def __process_category_page(self, page_link):
