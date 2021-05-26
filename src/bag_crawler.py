@@ -7,7 +7,8 @@ from src.vaccination_center_crawler import VaccinationCenterCrawler
 
 class BagCrawler:
     BAG_MARKER = ' (BAG)'
-    MAX_ANSWER_LENGTH = 10
+    MAX_ANSWER_LENGTH = 40
+    MIN_ANSWER_LENGTH = 20
     FAQ_NODE = 'faq'
     SCHEDULE_VACCINATION_NODE = 'how-and-where-can-i-register-vaccination'
     def __init__(self, watson_api_key, watson_skill_id, watson_workspace_url, bag_faq_url, vaccination_center_url):
@@ -68,7 +69,9 @@ class BagCrawler:
 
     def shorten_answer(self, answer):
         cut_index = answer.find('.')
-        if cut_index <= 0 and self.MAX_ANSWER_LENGTH < len(answer):
+        if cut_index < self.MIN_ANSWER_LENGTH and self.MIN_ANSWER_LENGTH < len(answer) and len(answer) > self.MAX_ANSWER_LENGTH:
+            cut_index = self.MIN_ANSWER_LENGTH
+        elif cut_index > self.MAX_ANSWER_LENGTH:
             cut_index = self.MAX_ANSWER_LENGTH
         elif cut_index <= 0:
             cut_index = len(answer)
