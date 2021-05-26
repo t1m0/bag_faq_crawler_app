@@ -1,8 +1,7 @@
 import logging
 
 from ibm_watson import AssistantV1, ApiException
-from ibm_watson.assistant_v1 import DialogNodeOutputGenericDialogNodeOutputResponseTypeText, DialogNodeOutputTextValuesElement, DialogNodeOutput, CreateIntent, \
-    DialogNode, Example
+from ibm_watson.assistant_v1 import DialogNodeOutputGenericDialogNodeOutputResponseTypeText, DialogNodeOutputTextValuesElement, DialogNodeOutput, DialogNodeNextStep
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 
@@ -62,7 +61,10 @@ class WatsonWrapper:
             logging.warning("Dialog node '"+uuid+"' not present!")
             return None
 
-    def createDialogNode(self, uuid, question, answer, parent):
+    def createDialogNode(self, uuid, question, answer, parent, with_jump):
+        next_step = None
+        if with_jump:
+            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='user_input')
         dialogOutput = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
@@ -74,10 +76,14 @@ class WatsonWrapper:
             title=question,
             conditions='#' + uuid,
             output=DialogNodeOutput(generic=[dialogOutput]),
-            parent=parent
+            parent=parent,
+            next_step=next_step
         ).get_result()
 
-    def update_dialog_node(self, uuid, question, answer, parent):
+    def update_dialog_node(self, uuid, question, answer, parent, with_jump):
+        next_step = None
+        if with_jump:
+            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='user_input')
         dialog_output = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
@@ -88,7 +94,8 @@ class WatsonWrapper:
             new_description=question,
             new_title=question,
             new_output=DialogNodeOutput(generic=[dialog_output]),
-            new_parent=parent
+            new_parent=parent,
+            new_next_step=next_step
         ).get_result()
 
     def delete_dialog_node(self, uuid):
@@ -113,9 +120,11 @@ class WatsonWrapper:
         ).get_result()
         for node in response['dialog_nodes']:
             if 'parent' in node and parent == node['parent']:
+
                 current_node = {
                     'uuid': node['dialog_node'],
-                    'question': node['title']
+                    'question': node['title'],
+                    'jump_to_present': 'next_step' in node
                 }
                 if 'output' in node.keys():
                     current_node['answer'] = node['output']['generic'][0]['values'][0]['text']

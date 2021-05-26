@@ -32,16 +32,21 @@ class BagCrawler:
             self.watson.create_dialog_folder(self.FAQ_NODE, 'FAQ')
 
     def faq_callback(self, uuid, link, question, answer):
+        with_jump = self.SCHEDULE_VACCINATION_NODE != uuid
         question_with_marker = self.limit_question_to_128_characters(question) + self.BAG_MARKER
         short_answer = self.shorten_answer(answer)
         answer_with_link = self.add_link_to_faq(short_answer, link)
         if uuid not in self.existing_faq_entries.keys():
             logging.info("Adding " + uuid + "to watson assitant")
             self.watson.createIntent(uuid, question_with_marker)
-            self.watson.createDialogNode(uuid, question_with_marker, answer_with_link,self.FAQ_NODE)
+            self.watson.createDialogNode(uuid, question_with_marker, answer_with_link, self.FAQ_NODE, with_jump)
         elif self.existing_entry_has_changed(self.existing_faq_entries[uuid], question_with_marker, answer_with_link):
             logging.info("Question or Answer for " + uuid + " changed, therefore updating watson assistant.")
-            self.update_watson(uuid, question_with_marker, answer_with_link)
+            self.update_watson(uuid, question_with_marker, answer_with_link, with_jump)
+            del self.existing_faq_entries[uuid]
+        elif self.jump_to_missing(self.existing_faq_entries[uuid], with_jump):
+            logging.info("Jump to missing for " + uuid + ", therefore updating watson assistant.")
+            self.watson.update_dialog_node(uuid, question_with_marker, answer_with_link, self.FAQ_NODE, with_jump)
             del self.existing_faq_entries[uuid]
         else:
             logging.info("Not adding " + uuid + " to watson assistant, since it's already present.")
@@ -55,11 +60,11 @@ class BagCrawler:
         text += '.'
         if uuid in self.existing_vaccination_centers.keys():
             logging.info("Updating "+canton)
-            self.watson.update_dialog_node(uuid,canton,text,self.SCHEDULE_VACCINATION_NODE)
+            self.watson.update_dialog_node(uuid,canton,text,self.SCHEDULE_VACCINATION_NODE,True)
         else:
             logging.info("Creating "+canton)
             self.watson.createIntent(uuid,canton)
-            self.watson.createDialogNode(uuid,canton,text,self.SCHEDULE_VACCINATION_NODE)
+            self.watson.createDialogNode(uuid,canton,text,self.SCHEDULE_VACCINATION_NODE,True)
 
     def limit_question_to_128_characters(self, question):
         if len(question) > (128-len(self.BAG_MARKER)):
@@ -83,7 +88,10 @@ class BagCrawler:
     def existing_entry_has_changed(self, existing_dialog_node, question, answer):
         return question != existing_dialog_node['question'] or answer != existing_dialog_node['answer']
 
-    def update_watson(self, uuid, question, answer):
+    def jump_to_missing(self, existing_dialog_node, jump_to):
+        return existing_dialog_node['jump_to_present'] != jump_to
+
+    def update_watson(self, uuid, question, answer, with_jump):
         current_intent = self.watson.get_intent(uuid)
         for example in current_intent['examples']:
             if self.BAG_MARKER in example['text']:
@@ -91,7 +99,7 @@ class BagCrawler:
                 break
         current_intent['description'] = question
         self.watson.update_intent(current_intent)
-        self.watson.update_dialog_node(uuid, question, answer,self.FAQ_NODE)
+        self.watson.update_dialog_node(uuid, question, answer, self.FAQ_NODE, with_jump)
 
     def remove_no_longer_valid_faq_entries(self):
         for node in self.existing_faq_entries:
