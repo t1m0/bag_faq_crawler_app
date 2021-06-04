@@ -64,7 +64,7 @@ class WatsonWrapper:
     def createDialogNode(self, uuid, question, answer, parent, with_jump):
         next_step = None
         if with_jump:
-            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='user_input')
+            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='body')
         dialogOutput = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
@@ -83,7 +83,7 @@ class WatsonWrapper:
     def update_dialog_node(self, uuid, question, answer, parent, with_jump):
         next_step = None
         if with_jump:
-            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='user_input')
+            next_step = DialogNodeNextStep('jump_to', dialog_node='Anything else', selector='body')
         dialog_output = DialogNodeOutputGenericDialogNodeOutputResponseTypeText(
             response_type='text',
             values=[DialogNodeOutputTextValuesElement(text=answer)]
