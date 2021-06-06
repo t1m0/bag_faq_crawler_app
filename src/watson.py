@@ -120,12 +120,15 @@ class WatsonWrapper:
         ).get_result()
         for node in response['dialog_nodes']:
             if 'parent' in node and parent == node['parent']:
-
                 current_node = {
                     'uuid': node['dialog_node'],
-                    'question': node['title'],
                     'jump_to_present': 'next_step' in node
                 }
+                if 'title' in node.keys():
+                    current_node['question'] = node['title']
+                else:
+                    logging.warning("Dialog node '"+node['dialog_node']+"' has no title!")
+                    current_node['question'] = ""
                 if 'output' in node.keys():
                     current_node['answer'] = node['output']['generic'][0]['values'][0]['text']
                 dialog_nodes[node['dialog_node']] = current_node
