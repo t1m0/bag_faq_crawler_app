@@ -9,7 +9,7 @@ class TestBagFaqCrawler(unittest.TestCase):
     text_not_cut = "Lorem ipsum dolor sit amet orci aliquam."
     text_not_cut_processed = "Lorem ipsum dolor sit amet orci aliquam. ..." + find_more_link
 
-    text_cut_at_first_point = "Lorem ipsum dolor sit amet, consectetur adipiscing elit nama quis magna lectusda. Aliquam ac vel."
+    text_cut_at_first_point = "Lorem ipsum dolor sit amet, consectetur adipiscing elit nama quis magna lectusda. Proin accumsan orci a imperdiet rutrum. Quisque pulvinar maximus semper. Phasellus cras amet."
     text_cut_at_first_point_cut = "Lorem ipsum dolor sit amet, consectetur adipiscing elit nama quis magna lectusda. ..." + find_more_link
 
     text_cut_at_max_length = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin accumsan orci a imperdiet rutrum. Quisque pulvinar maximus semper. Phasellus cras amet."

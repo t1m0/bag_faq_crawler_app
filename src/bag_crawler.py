@@ -74,12 +74,10 @@ class BagCrawler:
 
     def shorten_answer(self, answer):
         cut_index = answer.find('.')
+        if len(answer) <= self.MAX_ANSWER_LENGTH:
+            cut_index = len(answer)
         if cut_index < self.MIN_ANSWER_LENGTH and len(answer) > self.MAX_ANSWER_LENGTH:
             cut_index = self.MAX_ANSWER_LENGTH
-        elif cut_index > self.MAX_ANSWER_LENGTH:
-            cut_index = self.MAX_ANSWER_LENGTH
-        elif cut_index <= 0:
-            cut_index = len(answer)
         return answer[0:cut_index+1] + ' ...'
 
     def add_link_to_faq(self, answer, link):
